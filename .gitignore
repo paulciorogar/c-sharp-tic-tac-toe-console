@@ -1,0 +1,7 @@
+/.vs
+/.vscode
+/Testresults
+/TicTacToe/bin
+/TicTacToe/obj
+/TicTacToe.UnitTests/bin
+/TicTacToe.UnitTests/obj

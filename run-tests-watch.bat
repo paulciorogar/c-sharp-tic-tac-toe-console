@@ -1,0 +1,1 @@
+dotnet watch test --project TicTacToe.UnitTests\TicTacToe.UnitTests.csproj
