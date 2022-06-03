@@ -7,12 +7,13 @@ public class Slots<T>
 
     public Slots()
     {
-        _size = 3;
+        _size = 3; // TODO: make this dynamic
         _slots = new T[_size, _size];
     }
 
     private Slots(T[,] initData)
     {
+        _size = 3; // TODO: make this dynamic
         _slots = initData;
     }
 
@@ -36,9 +37,17 @@ public class Slots<T>
         });
     }
 
-    public T Val(int row, int col)
+    public IMaybe<T> Val(int row, int col)
     {
-        return _slots[row, col];
+        if (row < _size && col < _size)
+        {
+            return new Some<T>(_slots[row, col]);
+        }
+        else
+        {
+            return new None<T>();
+
+        }
     }
 
     public Slots<U> Map<U>(MapCallback<U, T> callback)

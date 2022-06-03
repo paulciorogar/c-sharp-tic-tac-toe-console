@@ -12,10 +12,34 @@ public class Game
 
     public void MarkSlot(int row, int col)
     {
-        var data = new PartialState();
-        data.slots = State.slots.Update(row, col, State.currentUserMark);
-        data.currentUserMark = State.currentUserMark == Mark.X ? Mark.O : Mark.X;
-        State = State.Update(data);
+        var maybeSlot = State.slots.Val(row, col);
+
+        State = maybeSlot.Map(slot =>
+        {
+            var data = new PartialState();
+            if (slot != Mark.NONE)
+            {
+                data.message = $"Slot {row}.{col} already marked by: {slot}";
+                return State.Update(data);
+            }
+
+            if (State.message != string.Empty)
+            {
+                data.message = string.Empty;
+            }
+
+            data.slots = State.slots.Update(row, col, State.currentUserMark);
+            data.currentUserMark = State.currentUserMark == Mark.X ? Mark.O : Mark.X;
+            return State.Update(data);
+
+        })
+        .CatchMap(() =>
+        {
+            var data = new PartialState();
+            data.message = $"Slot {row}.{col} is not in this game";
+            return State.Update(data);
+        })
+        .OrSome(State);
     }
     // public void Mark(string slotId)
     // {
