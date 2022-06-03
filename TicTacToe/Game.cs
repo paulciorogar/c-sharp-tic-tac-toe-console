@@ -2,7 +2,6 @@
 
 public class Game
 {
-    // private State _state;
     public Game(State state)
     {
         State = state;

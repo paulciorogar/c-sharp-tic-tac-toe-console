@@ -1,8 +1,8 @@
 namespace TicTacToe;
 
-public interface IMaybe<T>
+public interface IMaybe<T> where T : notnull
 {
-    public IMaybe<TResult> Map<TResult>(Func<T, TResult> callback);
+    public IMaybe<TResult> Map<TResult>(Func<T, TResult> callback) where TResult : notnull;
     public IMaybe<T> CatchMap(Func<T> callback);
     public T OrSome(T orValue);
 
@@ -10,14 +10,14 @@ public interface IMaybe<T>
 
 public static class Maybe
 {
-    public static IMaybe<T> Of<T>(T val)
+    public static IMaybe<T> Of<T, U>(U val) where U : T where T : notnull
     {
         if (val is null) return new None<T>();
         return new Some<T>(val);
     }
 }
 
-public class Some<T> : IMaybe<T>
+public class Some<T> : IMaybe<T> where T : notnull
 {
     private T _val;
     public Some(T val)
@@ -25,7 +25,7 @@ public class Some<T> : IMaybe<T>
         _val = val;
     }
 
-    public IMaybe<TResult> Map<TResult>(Func<T, TResult> callback)
+    public IMaybe<TResult> Map<TResult>(Func<T, TResult> callback) where TResult : notnull
     {
         return new Some<TResult>(callback(_val));
     }
@@ -41,9 +41,9 @@ public class Some<T> : IMaybe<T>
     }
 }
 
-public class None<T> : IMaybe<T>
+public class None<T> : IMaybe<T> where T : notnull
 {
-    public IMaybe<TResult> Map<TResult>(Func<T, TResult> callback)
+    public IMaybe<TResult> Map<TResult>(Func<T, TResult> callback) where TResult : notnull
     {
         return new None<TResult>();
     }

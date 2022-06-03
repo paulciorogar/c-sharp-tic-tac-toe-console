@@ -1,6 +1,6 @@
 namespace TicTacToe;
 
-public class Slots<T>
+public class Slots<T> where T : notnull
 {
     private T[,] _slots;
     private int _size;
@@ -50,7 +50,7 @@ public class Slots<T>
         }
     }
 
-    public Slots<U> Map<U>(MapCallback<U, T> callback)
+    public Slots<U> Map<U>(MapCallback<U, T> callback) where U : notnull
     {
         var newData = new U[_size, _size];
         ForEach((val, row, col) => newData[row, col] = callback(_slots[row, col], row, col));
