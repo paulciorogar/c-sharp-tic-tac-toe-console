@@ -16,29 +16,40 @@ public class Slots<T>
         _slots = initData;
     }
 
-    public void ForEach(Action<T> callback)
+    public void ForEach(Action<T, int, int> callback)
     {
-        foreach (var item in _slots)
+        for (int row = 0; row < _size; row++)
         {
-            callback(item);
+            for (int col = 0; col < _size; col++)
+            {
+                callback(_slots[row, col], row, col);
+            }
         }
+    }
+
+    internal Slots<T> Update(int updateRow, int updateCol, T val)
+    {
+        return Map<T>((oldVal, row, col) =>
+        {
+            if (row == updateRow && col == updateCol) return val;
+            return oldVal;
+        });
+    }
+
+    public T Val(int row, int col)
+    {
+        return _slots[row, col];
     }
 
     public Slots<U> Map<U>(MapCallback<U, T> callback)
     {
         var newData = new U[_size, _size];
-        for (int row = 0; row < _size; row++)
-        {
-            for (int col = 0; col < _size; col++)
-            {
-                newData[row, col] = callback(_slots[row, col], row, col);
-            }
-        }
+        ForEach((val, row, col) => newData[row, col] = callback(_slots[row, col], row, col));
         return new Slots<U>(newData);
     }
 }
 
-public delegate T MapCallback<T, U>(U val, int row, int col);
+public delegate TResult MapCallback<TResult, TVal>(TVal val, int row, int col);
 
 public enum Mark
 {
