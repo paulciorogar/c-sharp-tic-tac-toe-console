@@ -45,7 +45,7 @@ public class Slots<T> where T : notnull
         }
         else
         {
-            return new None<T>();
+            return new Nothing<T>();
 
         }
     }

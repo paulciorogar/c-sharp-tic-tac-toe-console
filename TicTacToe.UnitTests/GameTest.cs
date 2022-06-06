@@ -11,7 +11,7 @@ namespace TicTacToe.UnitTests
 
             game.MarkSlot(1, 1);
 
-            var result = game.State.slots.Val(1, 1).OrSome(Mark.NONE);
+            var result = game.State.Slots.Val(1, 1).OrSome(Mark.NONE);
             Assert.AreEqual(Mark.X, result);
         }
 
@@ -19,12 +19,12 @@ namespace TicTacToe.UnitTests
         public void TestMethod2()
         {
             var state = State.New();
-            state = state.Update(new PartialState() { currentUserMark = Mark.O });
+            state = state.Update(new PartialState() { CurrentUserMark = Mark.O });
             var game = new Game(state);
 
             game.MarkSlot(1, 1);
 
-            var result = game.State.slots.Val(1, 1).OrSome(Mark.NONE);
+            var result = game.State.Slots.Val(1, 1).OrSome(Mark.NONE);
             Assert.AreEqual(Mark.O, result);
         }
 
@@ -36,7 +36,7 @@ namespace TicTacToe.UnitTests
 
             game.MarkSlot(1, 1);
 
-            Assert.AreEqual(Mark.O, game.State.currentUserMark);
+            Assert.AreEqual(Mark.O, game.State.CurrentUserMark);
         }
 
         [TestMethod("it should not mark a slot that is marked already")]
@@ -45,14 +45,14 @@ namespace TicTacToe.UnitTests
             var state = State.New();
             var game = new Game(state);
 
-            Assert.AreEqual(String.Empty, game.State.message);
+            Assert.AreEqual(String.Empty, game.State.Message);
 
             game.MarkSlot(1, 1);
             game.MarkSlot(1, 1);
 
-            var result = game.State.slots.Val(1, 1).OrSome(Mark.NONE);
+            var result = game.State.Slots.Val(1, 1).OrSome(Mark.NONE);
             Assert.AreEqual(Mark.X, result);
-            Assert.AreEqual("Slot 1.1 already marked by: X", game.State.message);
+            Assert.AreEqual("Slot 1.1 already marked by: X", game.State.Message);
         }
 
         [TestMethod("it should clear message once a valid mark is done")]
@@ -61,16 +61,16 @@ namespace TicTacToe.UnitTests
             var state = State.New();
             var game = new Game(state);
 
-            Assert.AreEqual(String.Empty, game.State.message);
+            Assert.AreEqual(String.Empty, game.State.Message);
 
             game.MarkSlot(1, 1);
             game.MarkSlot(1, 1);
 
-            Assert.AreNotEqual(string.Empty, game.State.message);
+            Assert.AreNotEqual(string.Empty, game.State.Message);
 
             game.MarkSlot(1, 2);
 
-            Assert.AreEqual(string.Empty, game.State.message);
+            Assert.AreEqual(string.Empty, game.State.Message);
         }
 
         [TestMethod("it provides a message if slot does not exist")]
@@ -79,11 +79,11 @@ namespace TicTacToe.UnitTests
             var state = State.New();
             var game = new Game(state);
 
-            Assert.AreEqual(String.Empty, game.State.message);
+            Assert.AreEqual(String.Empty, game.State.Message);
 
             game.MarkSlot(100, 100);
 
-            Assert.AreEqual("Slot 100.100 is not in this game", game.State.message);
+            Assert.AreEqual("Slot 100.100 is not in this game", game.State.Message);
         }
     }
 }

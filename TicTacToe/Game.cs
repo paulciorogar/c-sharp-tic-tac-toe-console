@@ -11,35 +11,45 @@ public class Game
 
     public void MarkSlot(int row, int col)
     {
-        var maybeSlot = State.slots.Val(row, col);
+        var maybeSlot = State.Slots.Val(row, col);
 
-        State = maybeSlot.Map(slot =>
+        State = maybeSlot.Map(slot => slot switch
         {
-            var data = new PartialState();
-            if (slot != Mark.NONE)
-            {
-                data.message = $"Slot {row}.{col} already marked by: {slot}";
-                return State.Update(data);
-            }
-
-            if (State.message != string.Empty)
-            {
-                data.message = string.Empty;
-            }
-
-            data.slots = State.slots.Update(row, col, State.currentUserMark);
-            data.currentUserMark = State.currentUserMark == Mark.X ? Mark.O : Mark.X;
-            return State.Update(data);
-
+            Mark.NONE => ApplyMarkOn(row, col),
+            _ => SlotAlreadyMarked(row, col, slot)
         })
-        .CatchMap(() =>
-        {
-            var data = new PartialState();
-            data.message = $"Slot {row}.{col} is not in this game";
-            return State.Update(data);
-        })
+        .CatchMap(() => ImpossibleSlot(row, col))
+        .Map(ResolveGame(row, col))
         .OrSome(State);
     }
+
+    private Func<State, State> ResolveGame(int row, int col)
+    {
+        return state => Maybe.Just(state)
+            .Filter(state => state.Message == string.Empty)
+            .Map(Victory)
+            .OrSome(state);
+    }
+
+    private State Victory(State state)
+    {
+        return state;
+    }
+
+    private State ImpossibleSlot(int row, int col)
+    {
+        var data = new PartialState();
+        data.Message = $"Slot {row}.{col} is not in this game";
+        return State.Update(data);
+    }
+
+    private State SlotAlreadyMarked(int row, int col, Mark slot)
+    {
+        var data = new PartialState();
+        data.Message = $"Slot {row}.{col} already marked by: {slot}";
+        return State.Update(data);
+    }
+
     // public void Mark(string slotId)
     // {
     //     var slotIdParts = slotId.Split(".");
@@ -56,4 +66,17 @@ public class Game
 
 
     // }
+    private State ApplyMarkOn(int row, int col)
+    {
+        var data = new PartialState();
+        if (State.Message != string.Empty)
+        {
+            data.Message = string.Empty;
+        }
+
+        data.Slots = State.Slots.Update(row, col, State.CurrentUserMark);
+        data.CurrentUserMark = State.CurrentUserMark == Mark.X ? Mark.O : Mark.X;
+        return State.Update(data);
+    }
+
 }

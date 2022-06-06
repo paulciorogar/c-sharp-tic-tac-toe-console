@@ -2,15 +2,17 @@ namespace TicTacToe;
 
 public class State
 {
-    public readonly Slots<Mark> slots;
-    public readonly Mark currentUserMark;
-    public string message;
+    public readonly Slots<Mark> Slots;
+    public readonly Mark CurrentUserMark;
+
+    // public readonly GameState GameState;
+    public string Message;
 
     private State(Mark currentUserMark, Slots<Mark> slots, string message)
     {
-        this.currentUserMark = currentUserMark;
-        this.slots = slots;
-        this.message = message;
+        this.CurrentUserMark = currentUserMark;
+        this.Slots = slots;
+        this.Message = message;
     }
 
     public static State New()
@@ -22,9 +24,9 @@ public class State
     public State Update(PartialState data)
     {
         return new State(
-            data.currentUserMark ?? currentUserMark,
-            data.slots ?? slots,
-            data.message ?? message
+            data.CurrentUserMark ?? CurrentUserMark,
+            data.Slots ?? Slots,
+            data.Message ?? Message
         );
     }
 
@@ -32,7 +34,7 @@ public class State
 
 public class PartialState
 {
-    public Slots<Mark>? slots;
-    public Mark? currentUserMark;
-    internal string? message;
+    public Slots<Mark>? Slots;
+    public Mark? CurrentUserMark;
+    internal string? Message;
 }
