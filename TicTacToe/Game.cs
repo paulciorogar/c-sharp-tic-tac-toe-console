@@ -18,7 +18,7 @@ public class Game
             Mark.NONE => ApplyMarkOn(row, col),
             _ => SlotAlreadyMarked(row, col, slot)
         })
-        .CatchMap(() => ImpossibleSlot(row, col))
+        .CatchMap(ImpossibleSlot(row, col))
         .Map(ResolveGame(row, col))
         .OrSome(State);
     }
@@ -36,17 +36,20 @@ public class Game
         return state;
     }
 
-    private State ImpossibleSlot(int row, int col)
+    private Func<State> ImpossibleSlot(int row, int col)
     {
-        var data = new PartialState();
-        data.Message = $"Slot {row}.{col} is not in this game";
-        return State.Update(data);
+        return () =>
+        {
+            var data = new PartialState();
+            data.Conclusion = new InvalidInput($"Slot {row}.{col} is not in this game");
+            return State.Update(data);
+        };
     }
 
     private State SlotAlreadyMarked(int row, int col, Mark slot)
     {
         var data = new PartialState();
-        data.Message = $"Slot {row}.{col} already marked by: {slot}";
+        data.Conclusion = new InvalidInput($"Slot {row}.{col} already marked by: {slot}");
         return State.Update(data);
     }
 
@@ -69,9 +72,9 @@ public class Game
     private State ApplyMarkOn(int row, int col)
     {
         var data = new PartialState();
-        if (State.Message != string.Empty)
+        if (State.Conclusion is InvalidInput)
         {
-            data.Message = string.Empty;
+            data.Conclusion = new NotConcluded();
         }
 
         data.Slots = State.Slots.Update(row, col, State.CurrentUserMark);
