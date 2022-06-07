@@ -23,7 +23,7 @@ public class Game
         .OrSome(State);
     }
 
-    private State ResolveGame(State state)
+    private static State ResolveGame(State state)
     {
         return Maybe.Just(state)
             .Filter(state => state.Conclusion is not InvalidInput)
@@ -31,18 +31,25 @@ public class Game
             .OrSome(state);
     }
 
-    private State Victory(State state)
+    private static State Victory(State state)
     {
         return state.LastMark.Map(lastMark =>
         {
-            var count = countWestMarks(lastMark, state.Slots) + countEastMarks(lastMark, state.Slots);
-            if (count == 2)
+            var axis = new List<Func<int>>() {
+                () => countWestMarks(lastMark, state.Slots) + countEastMarks(lastMark, state.Slots),
+                () => countNorthMarks(lastMark, state.Slots) + countSouthMarks(lastMark, state.Slots),
+                () => countNWSEMarks(lastMark, state.Slots) + countSENWMarks(lastMark, state.Slots),
+                () => countSWNEMarks(lastMark, state.Slots) + countNESWMarks(lastMark, state.Slots)
+            };
+
+            if (axis.Any(count => count() == 2))
             {
                 return state.Update(data =>
                 {
                     data.Conclusion = new Victory($"{lastMark.Mark} won the game");
                     return data;
                 });
+
             }
             return state;
         }).OrSome(state);
@@ -50,18 +57,78 @@ public class Game
 
     private static int countWestMarks(LastMark lastMark, Slots<Mark> slots)
     {
-        var columnIdList = new List<int>() { lastMark.Col - 1, lastMark.Col - 2 };
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row, lastMark.Col - 1),
+            new SlotId(lastMark.Row, lastMark.Col - 2)
+        };
         return CountMarks(lastMark, slots, columnIdList);
     }
     private static int countEastMarks(LastMark lastMark, Slots<Mark> slots)
     {
-        var columnIdList = new List<int>() { lastMark.Col + 1, lastMark.Col + 2 };
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row, lastMark.Col + 1),
+            new SlotId(lastMark.Row, lastMark.Col + 2)
+        };
         return CountMarks(lastMark, slots, columnIdList);
     }
 
-    private static int CountMarks(LastMark lastMark, Slots<Mark> slots, IEnumerable<int> indexList)
+    private static int countNorthMarks(LastMark lastMark, Slots<Mark> slots)
     {
-        return indexList.Select(colIndex => slots.Val(lastMark.Row, colIndex)
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row -1, lastMark.Col),
+            new SlotId(lastMark.Row -2, lastMark.Col)
+        };
+        return CountMarks(lastMark, slots, columnIdList);
+    }
+
+    private static int countSouthMarks(LastMark lastMark, Slots<Mark> slots)
+    {
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row + 1, lastMark.Col),
+            new SlotId(lastMark.Row + 2, lastMark.Col)
+        };
+        return CountMarks(lastMark, slots, columnIdList);
+    }
+
+    private static int countNWSEMarks(LastMark lastMark, Slots<Mark> slots)
+    {
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row + 1, lastMark.Col + 1),
+            new SlotId(lastMark.Row + 2, lastMark.Col + 2)
+        };
+        return CountMarks(lastMark, slots, columnIdList);
+    }
+
+    private static int countSENWMarks(LastMark lastMark, Slots<Mark> slots)
+    {
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row - 1, lastMark.Col - 1),
+            new SlotId(lastMark.Row - 2, lastMark.Col - 2)
+        };
+        return CountMarks(lastMark, slots, columnIdList);
+    }
+
+    private static int countSWNEMarks(LastMark lastMark, Slots<Mark> slots)
+    {
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row - 1, lastMark.Col + 1),
+            new SlotId(lastMark.Row - 2, lastMark.Col + 2)
+        };
+        return CountMarks(lastMark, slots, columnIdList);
+    }
+
+    private static int countNESWMarks(LastMark lastMark, Slots<Mark> slots)
+    {
+        var columnIdList = new List<SlotId>() {
+            new SlotId(lastMark.Row + 1, lastMark.Col - 1),
+            new SlotId(lastMark.Row + 2, lastMark.Col - 2)
+        };
+        return CountMarks(lastMark, slots, columnIdList);
+    }
+
+    private static int CountMarks(LastMark lastMark, Slots<Mark> slots, IEnumerable<SlotId> slotIdList)
+    {
+        return slotIdList.Select(id => slots.Val(id.Row, id.Col)
             .Filter(mark => mark == lastMark.Mark)
             .Map(_ => 1)
             .OrSome(0)

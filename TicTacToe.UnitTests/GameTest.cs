@@ -113,5 +113,129 @@ namespace TicTacToe.UnitTests
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
         }
+
+        [TestMethod("should handle victory for column")]
+        public void TestMethod8()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row > 0 && col == 0) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(0, 0);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
+            Assert.AreEqual("X won the game", game.State.Conclusion.Message);
+        }
+
+        [TestMethod("should handle victory for diagonal: top left to bottom right")]
+        public void TestMethod9()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row == 1 && col == 1) return Mark.X;
+                    if (row == 2 && col == 2) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(0, 0);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
+            Assert.AreEqual("X won the game", game.State.Conclusion.Message);
+        }
+
+        [TestMethod("should handle victory for diagonal: bottom right to top left")]
+        public void TestMethod10()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row == 0 && col == 0) return Mark.X;
+                    if (row == 1 && col == 1) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(2, 2);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
+            Assert.AreEqual("X won the game", game.State.Conclusion.Message);
+        }
+
+        [TestMethod("should handle victory for diagonal: bottom left to top right")]
+        public void TestMethod11()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row == 0 && col == 2) return Mark.X;
+                    if (row == 1 && col == 1) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(2, 0);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
+            Assert.AreEqual("X won the game", game.State.Conclusion.Message);
+        }
+
+        [TestMethod("should handle victory for diagonal: top right to bottom left")]
+        public void TestMethod12()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row == 1 && col == 1) return Mark.X;
+                    if (row == 2 && col == 0) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(0, 2);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
+            Assert.AreEqual("X won the game", game.State.Conclusion.Message);
+        }
     }
 }

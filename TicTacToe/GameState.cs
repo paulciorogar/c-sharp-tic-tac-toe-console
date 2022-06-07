@@ -39,3 +39,5 @@ public class Stalemate : IGameState
         Message = message;
     }
 }
+
+public record SlotId(int Row, int Col);
