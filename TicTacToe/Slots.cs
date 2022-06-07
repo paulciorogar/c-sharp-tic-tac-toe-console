@@ -39,7 +39,7 @@ public class Slots<T> where T : notnull
 
     public IMaybe<T> Val(int row, int col)
     {
-        if (row < _size && col < _size)
+        if (row >= 0 && row < _size && col >= 0 && col < _size)
         {
             return new Some<T>(_slots[row, col]);
         }
@@ -50,15 +50,13 @@ public class Slots<T> where T : notnull
         }
     }
 
-    public Slots<U> Map<U>(MapCallback<U, T> callback) where U : notnull
+    public Slots<TResult> Map<TResult>(Func<T, int, int, TResult> callback) where TResult : notnull
     {
-        var newData = new U[_size, _size];
+        var newData = new TResult[_size, _size];
         ForEach((val, row, col) => newData[row, col] = callback(_slots[row, col], row, col));
-        return new Slots<U>(newData);
+        return new Slots<TResult>(newData);
     }
 }
-
-public delegate TResult MapCallback<TResult, TVal>(TVal val, int row, int col);
 
 public enum Mark
 {

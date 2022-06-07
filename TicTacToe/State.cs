@@ -2,36 +2,38 @@ namespace TicTacToe;
 
 public class State
 {
+    public readonly IMaybe<LastMark> LastMark;
     public readonly Slots<Mark> Slots;
     public readonly Mark CurrentUserMark;
     public readonly IGameState Conclusion;
-    public string Message;
 
     private State(
+        IMaybe<LastMark> lastMark,
         Mark currentUserMark,
         Slots<Mark> slots,
-        string message,
         IGameState gameState)
     {
+        this.LastMark = lastMark;
         this.CurrentUserMark = currentUserMark;
         this.Slots = slots;
         this.Conclusion = gameState;
-        this.Message = message;
     }
 
     public static State New()
     {
         var slots = new Slots<Mark>();
-        return new State(Mark.X, slots, string.Empty, new NotConcluded());
+        return new State(new Nothing<LastMark>(), Mark.X, slots, new NotConcluded());
     }
 
-    public State Update(PartialState data)
+    public State Update(Func<PartialState, PartialState> callback)
     {
+        var data = new PartialState();
+        var result = callback(data);
         return new State(
-            data.CurrentUserMark ?? CurrentUserMark,
-            data.Slots ?? Slots,
-            data.Message ?? Message,
-            data.Conclusion ?? Conclusion
+            result.LastMark ?? LastMark,
+            result.CurrentUserMark ?? CurrentUserMark,
+            result.Slots ?? Slots,
+            result.Conclusion ?? Conclusion
         );
     }
 
@@ -42,5 +44,5 @@ public class PartialState
     public Slots<Mark>? Slots;
     public Mark? CurrentUserMark;
     public IGameState? Conclusion;
-    internal string? Message;
+    public IMaybe<LastMark>? LastMark;
 }

@@ -19,7 +19,11 @@ namespace TicTacToe.UnitTests
         public void TestMethod2()
         {
             var state = State.New();
-            state = state.Update(new PartialState() { CurrentUserMark = Mark.O });
+            state = state.Update(data =>
+            {
+                data.CurrentUserMark = Mark.O;
+                return data;
+            });
             var game = new Game(state);
 
             game.MarkSlot(1, 1);
@@ -45,7 +49,7 @@ namespace TicTacToe.UnitTests
             var state = State.New();
             var game = new Game(state);
 
-            Assert.AreEqual(String.Empty, game.State.Message);
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
             game.MarkSlot(1, 1);
             game.MarkSlot(1, 1);
@@ -61,8 +65,6 @@ namespace TicTacToe.UnitTests
         {
             var state = State.New();
             var game = new Game(state);
-
-            Assert.AreEqual(String.Empty, game.State.Message);
 
             game.MarkSlot(1, 1);
             game.MarkSlot(1, 1);
@@ -86,6 +88,30 @@ namespace TicTacToe.UnitTests
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(InvalidInput));
             Assert.AreEqual("Slot 100.100 is not in this game", game.State.Conclusion.Message);
+        }
+
+        [TestMethod("should handle victory for row")]
+        public void TestMethod7()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row == 0 && col > 0) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(0, 0);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
+            Assert.AreEqual("X won the game", game.State.Conclusion.Message);
         }
     }
 }
