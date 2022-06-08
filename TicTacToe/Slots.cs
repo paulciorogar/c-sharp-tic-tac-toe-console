@@ -37,6 +37,16 @@ public class Slots<T> where T : notnull
         });
     }
 
+    internal Func<Func<TResult, T, TResult>, TResult> Reduce<TResult>(TResult initialVal)
+    {
+        var result = initialVal;
+        return (Func<TResult, T, TResult> callback) =>
+        {
+            ForEach((val, row, col) => result = callback(result, _slots[row, col]));
+            return result;
+        };
+    }
+
     public IMaybe<T> Val(int row, int col)
     {
         if (row >= 0 && row < _size && col >= 0 && col < _size)

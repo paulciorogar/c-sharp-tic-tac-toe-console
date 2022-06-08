@@ -237,5 +237,30 @@ namespace TicTacToe.UnitTests
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
         }
+
+        [TestMethod("should handle stalemate")]
+        public void TestMethod13()
+        {
+            var state = State.New();
+            state = state.Update(data =>
+            {
+                data.Slots = state.Slots.Map((val, row, col) =>
+                {
+                    if (row == 0 && col > 0) return Mark.X;
+                    if (row > 0) return Mark.X;
+                    return val;
+                });
+                return data;
+            });
+
+            var game = new Game(state);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
+
+            game.MarkSlot(0, 0);
+
+            Assert.IsInstanceOfType(game.State.Conclusion, typeof(Stalemate));
+            Assert.AreEqual("Stalemate, play again", game.State.Conclusion.Message);
+        }
     }
 }

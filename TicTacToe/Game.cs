@@ -25,14 +25,26 @@ public class Game
 
     private static State ResolveGame(State state)
     {
-        return Maybe.Just(state)
-            .Filter(state => state.Conclusion is not InvalidInput)
-            .Map(Victory)
-            .OrSome(state);
+        return state
+            .Pipe(Stalemate)
+            .Pipe(Victory);
+    }
+
+    private static State Stalemate(State state)
+    {
+        var movesLeft = state.Slots.Reduce(0)((result, mark) => result + ((mark == Mark.NONE) ? 1 : 0));
+        if (movesLeft > 0) return state;
+        return state.Update(data =>
+        {
+            data.Conclusion = new Stalemate("Stalemate, play again");
+            return data;
+        });
+
     }
 
     private static State Victory(State state)
     {
+        if (state.Conclusion is Stalemate) return state;
         return state.LastMark.Map(lastMark =>
         {
             var axis = new List<Func<int>>() {
@@ -49,7 +61,6 @@ public class Game
                     data.Conclusion = new Victory($"{lastMark.Mark} won the game");
                     return data;
                 });
-
             }
             return state;
         }).OrSome(state);
