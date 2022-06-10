@@ -3,13 +3,29 @@ namespace TicTacToe.UnitTests
     [TestClass]
     public class GameTest
     {
+        Dictionary<char, int> InputMap { get; set; }
+
+        [TestInitialize]
+        public void init()
+        {
+            InputMap = new();
+
+            InputMap['a'] = 0;
+            InputMap['b'] = 1;
+            InputMap['c'] = 2;
+            InputMap['1'] = 0;
+            InputMap['2'] = 1;
+            InputMap['3'] = 2;
+        }
+
+
         [TestMethod("should mark a slot with X if X's turn")]
         public void TestMethod1()
         {
             var state = State.New();
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
-            game.MarkSlot(1, 1);
+            game.MarkSlot('b', '2');
 
             var result = game.State.Slots.Val(1, 1).OrSome(Mark.NONE);
             Assert.AreEqual(Mark.X, result);
@@ -24,9 +40,9 @@ namespace TicTacToe.UnitTests
                 data.CurrentUserMark = Mark.O;
                 return data;
             });
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
-            game.MarkSlot(1, 1);
+            game.MarkSlot('b', '2');
 
             var result = game.State.Slots.Val(1, 1).OrSome(Mark.NONE);
             Assert.AreEqual(Mark.O, result);
@@ -36,9 +52,9 @@ namespace TicTacToe.UnitTests
         public void TestMethod3()
         {
             var state = State.New();
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
-            game.MarkSlot(1, 1);
+            game.MarkSlot('b', '2');
 
             Assert.AreEqual(Mark.O, game.State.CurrentUserMark);
         }
@@ -47,31 +63,31 @@ namespace TicTacToe.UnitTests
         public void TestMethod4()
         {
             var state = State.New();
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(1, 1);
-            game.MarkSlot(1, 1);
+            game.MarkSlot('b', '2');
+            game.MarkSlot('b', '2');
 
             var result = game.State.Slots.Val(1, 1).OrSome(Mark.NONE);
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(InvalidInput));
             Assert.AreEqual(Mark.X, result);
-            Assert.AreEqual("Slot 1.1 already marked by: X", game.State.Conclusion.Message);
+            Assert.AreEqual("Slot b2 already marked by: X", game.State.Conclusion.Message);
         }
 
         [TestMethod("should clear the error once a valid mark is done")]
         public void TestMethod5()
         {
             var state = State.New();
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
-            game.MarkSlot(1, 1);
-            game.MarkSlot(1, 1);
+            game.MarkSlot('b', '2');
+            game.MarkSlot('b', '2');
 
             Assert.IsNotInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(1, 2);
+            game.MarkSlot('a', '2');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
         }
@@ -80,14 +96,14 @@ namespace TicTacToe.UnitTests
         public void TestMethod6()
         {
             var state = State.New();
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsNotInstanceOfType(game.State.Conclusion, typeof(InvalidInput));
 
-            game.MarkSlot(100, 100);
+            game.MarkSlot('x', '9');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(InvalidInput));
-            Assert.AreEqual("Slot 100.100 is not in this game", game.State.Conclusion.Message);
+            Assert.AreEqual("Slot x9 is not in this game", game.State.Conclusion.Message);
         }
 
         [TestMethod("should handle victory for row")]
@@ -104,11 +120,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(0, 0);
+            game.MarkSlot('a', '1');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
@@ -128,11 +144,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(0, 0);
+            game.MarkSlot('a', '1');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
@@ -153,11 +169,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(0, 0);
+            game.MarkSlot('a', '1');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
@@ -178,11 +194,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(2, 2);
+            game.MarkSlot('c', '3');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
@@ -203,11 +219,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(2, 0);
+            game.MarkSlot('c', '1');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
@@ -228,11 +244,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(0, 2);
+            game.MarkSlot('a', '3');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Victory));
             Assert.AreEqual("X won the game", game.State.Conclusion.Message);
@@ -253,11 +269,11 @@ namespace TicTacToe.UnitTests
                 return data;
             });
 
-            var game = new Game(state);
+            var game = new Game(state, InputMap);
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(NotConcluded));
 
-            game.MarkSlot(0, 0);
+            game.MarkSlot('a', '1');
 
             Assert.IsInstanceOfType(game.State.Conclusion, typeof(Stalemate));
             Assert.AreEqual("Stalemate, play again", game.State.Conclusion.Message);

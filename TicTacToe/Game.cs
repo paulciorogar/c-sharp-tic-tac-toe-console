@@ -2,23 +2,33 @@
 
 public class Game
 {
-    public Game(State state)
+    public State State { get; internal set; }
+    public Dictionary<char, int> InputMap { get; init; }
+    public Game(State state, Dictionary<char, int> inputMap)
     {
         State = state;
+        InputMap = inputMap;
     }
 
-    public State State { get; internal set; }
 
-    public void MarkSlot(int row, int col)
+    public void MarkSlot(char rowId, char colId)
     {
+        var impossibleSlot = ImpossibleSlot(rowId, colId);
+        if (!InputMap.ContainsKey(rowId) || !InputMap.ContainsKey(colId))
+        {
+            State = impossibleSlot();
+            return;
+        }
+        var row = InputMap[rowId];
+        var col = InputMap[colId];
         var maybeSlot = State.Slots.Val(row, col);
 
         State = maybeSlot.Map(slot => slot switch
         {
             Mark.NONE => ApplyMarkOn(row, col),
-            _ => SlotAlreadyMarked(row, col, slot)
+            _ => SlotAlreadyMarked(rowId, colId, slot)
         })
-        .CatchMap(ImpossibleSlot(row, col))
+        .CatchMap(impossibleSlot)
         .Map(ResolveGame)
         .OrSome(State);
     }
@@ -146,23 +156,23 @@ public class Game
         ).Sum();
     }
 
-    private Func<State> ImpossibleSlot(int row, int col)
+    private Func<State> ImpossibleSlot(char row, char col)
     {
         return () =>
         {
             return State.Update(data =>
             {
-                data.Conclusion = new InvalidInput($"Slot {row}.{col} is not in this game");
+                data.Conclusion = new InvalidInput($"Slot {row}{col} is not in this game");
                 return data;
             });
         };
     }
 
-    private State SlotAlreadyMarked(int row, int col, Mark slot)
+    private State SlotAlreadyMarked(char row, char col, Mark slot)
     {
         return State.Update(data =>
         {
-            data.Conclusion = new InvalidInput($"Slot {row}.{col} already marked by: {slot}");
+            data.Conclusion = new InvalidInput($"Slot {row}{col} already marked by: {slot}");
             return data;
         });
     }
